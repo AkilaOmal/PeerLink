@@ -1,0 +1,488 @@
+.admin-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px 24px;
+  display: flex;
+  justify-content: center;
+  color: #2f333b;
+  background: #f5f7fa;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  text-align: left;
+}
+
+.admin-page *,
+.admin-page *::before,
+.admin-page *::after {
+  box-sizing: border-box;
+}
+
+.admin-shell {
+  width: min(1076px, 100%);
+  min-height: min(704px, calc(100vh - 60px));
+  align-self: flex-start;
+  overflow: hidden;
+  border: 1px solid #e1e5eb;
+  border-radius: 15px;
+  background: #f8f9fb;
+  box-shadow: 0 10px 30px rgb(34 44 59 / 5%);
+}
+
+.admin-topbar {
+  min-height: 61px;
+  padding: 0 31px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e7eaf0;
+  background: #fff;
+}
+
+.admin-topbar h1 {
+  margin: 0;
+  color: #292d35;
+  font-size: 19px;
+  font-weight: 720;
+  letter-spacing: -0.45px;
+}
+
+.admin-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #646a75;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-profile-avatar {
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #526fbe;
+  background: #e8efff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-layout {
+  min-height: 640px;
+  display: grid;
+  grid-template-columns: 192px minmax(0, 1fr);
+}
+
+.admin-sidebar {
+  padding: 20px 12px;
+  border-right: 1px solid #e7eaf0;
+  background: #fff;
+}
+
+.admin-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-nav-item {
+  width: 100%;
+  min-height: 37px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 6px;
+  color: #555c68;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background 140ms ease;
+}
+
+.admin-nav-item:hover {
+  color: #3473d1;
+  background: #f2f6ff;
+}
+
+.admin-nav-item.is-active {
+  color: #3473d1;
+  background: #e9f0ff;
+}
+
+.admin-nav-chevron {
+  margin-left: auto;
+  color: #858d99;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.admin-content {
+  min-width: 0;
+  padding: 17px 20px 20px;
+}
+
+.admin-mobile-title {
+  display: none;
+}
+
+.admin-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.admin-metric-card {
+  position: relative;
+  min-height: 79px;
+  padding: 12px 14px;
+  border: 1px solid #e1e6ed;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(27 39 55 / 2%);
+}
+
+.admin-metric-label {
+  margin-bottom: 5px;
+  color: #626873;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.admin-metric-value {
+  color: #252a33;
+  font-size: clamp(17px, 2vw, 23px);
+  font-weight: 740;
+  letter-spacing: -0.6px;
+  line-height: 1.15;
+}
+
+.admin-metric-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.admin-metric-icon.blue {
+  color: #4283df;
+  background: #e8f0ff;
+}
+
+.admin-metric-icon.green {
+  color: #27a77c;
+  background: #e1f7ee;
+}
+
+.admin-metric-icon.orange {
+  color: #ef8e37;
+  background: #fff0e1;
+}
+
+.admin-panel {
+  overflow: hidden;
+  border: 1px solid #e1e6ed;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(27 39 55 / 2%);
+}
+
+.admin-revenue-panel {
+  min-height: 267px;
+  margin-top: 15px;
+  padding: 0 14px 10px;
+}
+
+.admin-panel-heading {
+  min-height: 42px;
+  padding: 0 1px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-panel-heading h2 {
+  margin: 0;
+  color: #30343c;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.15px;
+}
+
+.admin-chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #606670;
+  font-size: 10px;
+}
+
+.admin-chart-legend i {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  border-radius: 50%;
+}
+
+.income-dot {
+  background: #397bd7;
+}
+
+.refund-dot {
+  background: #ff892e;
+}
+
+.admin-chart {
+  width: 100%;
+  height: 194px;
+  display: block;
+  overflow: visible;
+}
+
+.admin-chart-grid {
+  stroke: #e7ebf0;
+  stroke-width: 1;
+}
+
+.admin-chart-label {
+  fill: #525963;
+  font-family: inherit;
+  font-size: 9px;
+}
+
+.admin-chart-income,
+.admin-chart-refunds {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.admin-chart-income {
+  stroke: #3d82e6;
+}
+
+.admin-chart-refunds {
+  stroke: #ff842c;
+}
+
+.admin-chart-months {
+  margin: -2px 3px 0 48px;
+  display: flex;
+  justify-content: space-between;
+  color: #858b95;
+  font-size: 8px;
+}
+
+.admin-courses-panel {
+  margin-top: 14px;
+}
+
+.admin-courses-panel .admin-panel-heading {
+  min-height: 39px;
+  padding: 0 14px;
+}
+
+.admin-view-all {
+  padding: 4px 0 4px 8px;
+  border: 0;
+  color: #397bd7;
+  background: transparent;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.admin-view-all:hover {
+  color: #245ead;
+}
+
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-course-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #424852;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-course-table thead {
+  background: #f4f6f9;
+}
+
+.admin-course-table th,
+.admin-course-table td {
+  height: 35px;
+  padding: 0 14px;
+  border-top: 1px solid #e8ebf0;
+  font-size: 10px;
+}
+
+.admin-course-table th {
+  height: 31px;
+  color: #414650;
+  font-size: 9px;
+  font-weight: 680;
+}
+
+.admin-course-table td:first-child {
+  min-width: 195px;
+}
+
+.admin-demo-note {
+  margin: 9px 1px 0;
+  color: #8c929c;
+  font-size: 9px;
+  text-align: right;
+}
+
+@media (max-width: 850px) {
+  .admin-page {
+    padding: 18px 14px;
+  }
+
+  .admin-shell {
+    min-height: calc(100vh - 36px);
+  }
+
+  .admin-layout {
+    grid-template-columns: 155px minmax(0, 1fr);
+  }
+
+  .admin-content {
+    padding: 14px;
+  }
+
+  .admin-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-page {
+    padding: 0;
+  }
+
+  .admin-shell {
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .admin-topbar {
+    min-height: 57px;
+    padding: 0 16px;
+  }
+
+  .admin-topbar h1 {
+    font-size: 17px;
+  }
+
+  .admin-layout {
+    min-height: calc(100vh - 57px);
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    padding: 8px 10px;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid #e7eaf0;
+  }
+
+  .admin-sidebar nav {
+    width: max-content;
+    flex-direction: row;
+    gap: 5px;
+  }
+
+  .admin-nav-item {
+    width: auto;
+    min-height: 34px;
+    padding: 0 10px;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .admin-nav-item svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .admin-nav-chevron {
+    display: none;
+  }
+
+  .admin-content {
+    padding: 13px 12px 22px;
+  }
+
+  .admin-metrics {
+    gap: 9px;
+  }
+
+  .admin-metric-card {
+    min-height: 76px;
+    padding: 11px;
+  }
+
+  .admin-metric-value {
+    font-size: 19px;
+  }
+
+  .admin-revenue-panel {
+    min-height: 244px;
+    padding: 0 9px 9px;
+  }
+
+  .admin-panel-heading h2 {
+    font-size: 11px;
+  }
+
+  .admin-chart-legend {
+    gap: 8px;
+  }
+
+  .admin-chart-legend span {
+    gap: 4px;
+    font-size: 9px;
+  }
+
+  .admin-chart {
+    height: auto;
+    min-height: 160px;
+  }
+
+  .admin-chart-months {
+    margin-left: 40px;
+    font-size: 7px;
+  }
+
+  .admin-course-table th,
+  .admin-course-table td {
+    padding: 0 10px;
+  }
+}
