@@ -4,6 +4,7 @@ import Home from './Pages/Home'
 import Login from './Pages/Login'
 import Register from './Pages/Register'
 import Admin from './Pages/Admin'
+import User from './Pages/User'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/admin" element={<Admin />} />
+      <Route path="/user" element={<User />} />
     </Routes>
   )
 }
