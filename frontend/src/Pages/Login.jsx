@@ -1,13 +1,32 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import './Login.css'
+import axios from 'axios'
 
 function Login() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const navigate = useNavigate()
 
-  function handleSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault()
-    setMessage('Login is not connected to an authentication service yet.')
+    setMessage('')
+    setIsSubmitting(true)
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/login', { email, password })
+      navigate(response.data.role === 'ADMIN' ? '/admin' : '/user')
+    } catch (error) {
+      if (error.response?.status === 401) {
+        setMessage('The email or password is incorrect.')
+      } else {
+        setMessage('Unable to log in right now. Please try again later.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -28,7 +47,7 @@ function Login() {
             <h1 id="login-title">Login</h1>
             <p className="login-intro">Log in to access your PeerLink account.</p>
 
-            <form className="login-form" onSubmit={handleSubmit}>
+            <form className="login-form" onSubmit={onSubmit}>
               <label htmlFor="login-email">Email</label>
               <input
                 id="login-email"
@@ -36,6 +55,7 @@ function Login() {
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
+                onChange={(e)=>setEmail(e.target.value)}
                 required
               />
 
@@ -46,6 +66,7 @@ function Login() {
                 type="password"
                 placeholder="Enter your password"
                 autoComplete="current-password"
+                onChange={(e)=>setPassword(e.target.value)}
                 required
               />
 
@@ -59,8 +80,8 @@ function Login() {
                 </button>
               </div>
 
-              <button className="login-submit" type="submit">
-                Login
+              <button className="login-submit" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Logging in...' : 'Login'}
               </button>
             </form>
 
