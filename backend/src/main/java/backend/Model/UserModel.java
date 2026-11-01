@@ -1,5 +1,6 @@
 package backend.Model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -19,4 +20,6 @@ public class UserModel {
     private String lastName;
     private String email;
     private String password;
+    @Column(nullable = false)
+    private String role="USER";
 }
