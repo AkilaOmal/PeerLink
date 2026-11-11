@@ -1,36 +1,12 @@
 import { Link } from 'react-router-dom'
 import HeroImg from '../assets/HeroImg.png'
+import Navbar from '../Components/Navbar'
 import './Home.css'
 
 function Home() {
   return (
     <div className="home-page">
-      <header className="home-header">
-        <Link className="home-brand" to="/" aria-label="PeerLink home">
-          Peer<span>Link</span>
-        </Link>
-
-        <nav className="home-nav" aria-label="Main navigation">
-          <Link className="home-nav-link" to="/">
-            Home
-          </Link>
-          <a className="home-nav-link" href="#learning">
-            Courses
-          </a>
-          <a className="home-nav-link" href="#about">
-            About
-          </a>
-        </nav>
-
-        <div className="home-header-actions">
-          <Link className="home-login-button" to="/login">
-            Login
-          </Link>
-          <Link className="home-register-link" to="/register">
-            Go to Register
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
       <main>
         <section className="home-hero" id="learning">

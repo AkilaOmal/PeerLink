@@ -1,6 +1,22 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Navbar from '../Components/Navbar'
 import './Home.css'
 import './User.css'
+
+const maxVideoSize = 100 * 1024 * 1024
+
+const videoSubjects = [
+  'Computer Science',
+  'Software Engineering',
+  'Information Systems',
+  'Object-Oriented Programming (OOP)',
+  'Data Structures and Algorithms',
+  'Database Systems',
+  'Computer Networks',
+  'Web Development',
+  'Other',
+]
 
 const sidebarItems = [
   { label: 'Profile', icon: 'profile', active: true },
@@ -131,34 +147,60 @@ function UserIcon({ name }) {
 }
 
 function User() {
+  const navigate = useNavigate()
+  const [isUploadOpen, setIsUploadOpen] = useState(false)
+  const [videoSource, setVideoSource] = useState('file')
+  const [videoFile, setVideoFile] = useState(null)
+  const [uploadError, setUploadError] = useState('')
+  const [uploadStatus, setUploadStatus] = useState('')
+
+  function onLogout() {
+    localStorage.removeItem('peerlinkRole')
+    navigate('/')
+  }
+
+  function onVideoFileChange(event) {
+    const file = event.target.files?.[0]
+    setUploadError('')
+    setUploadStatus('')
+
+    if (!file) {
+      setVideoFile(null)
+      return
+    }
+
+    if (!file.type.startsWith('video/')) {
+      event.target.value = ''
+      setVideoFile(null)
+      setUploadError('Choose a video file.')
+      return
+    }
+
+    if (file.size > maxVideoSize) {
+      event.target.value = ''
+      setVideoFile(null)
+      setUploadError('The video must be 100 MB or smaller.')
+      return
+    }
+
+    setVideoFile(file)
+  }
+
+  function onVideoSourceChange(event) {
+    setVideoSource(event.target.value)
+    setVideoFile(null)
+    setUploadError('')
+    setUploadStatus('')
+  }
+
+  function onVideoSubmit(event) {
+    event.preventDefault()
+    setUploadStatus('The form is ready, but video uploads are not connected to a server yet. Nothing was submitted.')
+  }
+
   return (
     <div className="peerlink-user-page">
-      <header className="home-header">
-        <Link className="home-brand" to="/" aria-label="PeerLink home">
-          Peer<span>Link</span>
-        </Link>
-
-        <nav className="home-nav" aria-label="Main navigation">
-          <Link className="home-nav-link" to="/">
-            Home
-          </Link>
-          <Link className="home-nav-link" to="/#learning">
-            Courses
-          </Link>
-          <Link className="home-nav-link" to="/#about">
-            About
-          </Link>
-        </nav>
-
-        <div className="home-header-actions">
-          <Link className="home-login-button" to="/login">
-            Login
-          </Link>
-          <Link className="home-register-link" to="/register">
-            Go to Register
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="peerlink-user-main">
         <h1 className="peerlink-page-title">User Dashboard</h1>
@@ -171,6 +213,7 @@ function User() {
                   key={item.label}
                   type="button"
                   className={`peerlink-sidebar-item${item.active ? ' active' : ''}`}
+                  onClick={item.icon === 'logout' ? onLogout : undefined}
                 >
                   <span className="peerlink-sidebar-icon">
                     <UserIcon name={item.icon} />
@@ -206,8 +249,17 @@ function User() {
               <div className="peerlink-upload-icon">
                 <UserIcon name="upload" />
               </div>
-              <p>Drag &amp; drop your video here</p>
-              <button type="button">Choose Video</button>
+              <p> Upload your KUPPI video here</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setUploadError('')
+                  setUploadStatus('')
+                  setIsUploadOpen(true)
+                }}
+              >
+                Upload Video
+              </button>
             </div>
           </aside>
 
@@ -304,6 +356,109 @@ function User() {
           </section>
         </div>
       </main>
+
+      {isUploadOpen && (
+        <div className="peerlink-video-modal-backdrop">
+          <section
+            className="peerlink-video-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="peerlink-video-title"
+          >
+            <header className="peerlink-video-dialog-header">
+              <div>
+                <h2 id="peerlink-video-title">Upload a KUPPI video</h2>
+                <p>Add the subject and a short description for your video.</p>
+              </div>
+              <button
+                className="peerlink-video-close"
+                type="button"
+                aria-label="Close upload form"
+                onClick={() => setIsUploadOpen(false)}
+              >
+                ×
+              </button>
+            </header>
+
+            <form className="peerlink-video-form" onSubmit={onVideoSubmit}>
+              <label htmlFor="video-subject">Subject</label>
+              <select id="video-subject" name="subject" required defaultValue="">
+                <option value="" disabled>
+                  Select a subject
+                </option>
+                {videoSubjects.map((subject) => (
+                  <option key={subject} value={subject}>
+                    {subject}
+                  </option>
+                ))}
+              </select>
+
+              <label htmlFor="video-description">Video description</label>
+              <textarea
+                id="video-description"
+                name="description"
+                rows="4"
+                placeholder="Describe what your video covers"
+                required
+              />
+
+              <label htmlFor="video-source">Video source</label>
+              <select id="video-source" value={videoSource} onChange={onVideoSourceChange}>
+                <option value="file">Upload a video file</option>
+                <option value="link">Use a video link</option>
+              </select>
+
+              {videoSource === 'file' ? (
+                <>
+                  <label htmlFor="video-file">Video file (maximum 100 MB)</label>
+                  <input
+                    id="video-file"
+                    name="video"
+                    type="file"
+                    accept="video/*"
+                    required
+                    onChange={onVideoFileChange}
+                  />
+                  {videoFile && (
+                    <small className="peerlink-video-file-info">
+                      {videoFile.name} ({(videoFile.size / (1024 * 1024)).toFixed(1)} MB)
+                    </small>
+                  )}
+                </>
+              ) : (
+                <>
+                  <label htmlFor="video-link">Video link</label>
+                  <input
+                    id="video-link"
+                    name="videoLink"
+                    type="url"
+                    placeholder="https://example.com/your-video"
+                    required
+                  />
+                </>
+              )}
+
+              {uploadError && (
+                <p className="peerlink-video-message error" role="alert">
+                  {uploadError}
+                </p>
+              )}
+              {uploadStatus && (
+                <p className="peerlink-video-message" role="status">
+                  {uploadStatus}
+                </p>
+              )}
+
+              <div className="peerlink-video-form-actions">
+                <button type="button" className="secondary" onClick={() => setIsUploadOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit">Submit video</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   )
 }

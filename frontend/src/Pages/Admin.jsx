@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Navbar from '../Components/Navbar'
 import './Admin.css'
 
 const courses = [
@@ -167,6 +168,7 @@ function Admin() {
 
   return (
     <main className="admin-page">
+      <Navbar />
       <section className="admin-shell" aria-label="Admin dashboard">
         <header className="admin-topbar">
           <h1>Admin Dashboard</h1>

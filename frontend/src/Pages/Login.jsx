@@ -17,7 +17,15 @@ function Login() {
 
     try {
       const response = await axios.post('http://localhost:8080/api/login', { email, password })
-      navigate(response.data.role === 'ADMIN' ? '/admin' : '/user')
+      const { role } = response.data
+
+      if (role !== 'ADMIN' && role !== 'USER') {
+        setMessage('Unable to verify your account role. Please contact support.')
+        return
+      }
+
+      localStorage.setItem('peerlinkRole', role)
+      navigate(role === 'ADMIN' ? '/admin' : '/user', { replace: true })
     } catch (error) {
       if (error.response?.status === 401) {
         setMessage('The email or password is incorrect.')
