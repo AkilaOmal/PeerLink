@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import '../Pages/Home.css'
 
 function Navbar() {
@@ -7,9 +8,14 @@ function Navbar() {
   const isLoggedIn = role === 'USER' || role === 'ADMIN'
   const accountPath = role === 'ADMIN' ? '/admin' : '/user'
 
-  function onLogout() {
-    localStorage.removeItem('peerlinkRole')
-    navigate('/')
+  async function onLogout() {
+    try {
+      await axios.post('http://localhost:8080/api/logout', {}, { withCredentials: true })
+      localStorage.removeItem('peerlinkRole')
+      navigate('/')
+    } catch {
+      window.alert('Could not end your server session. Please try again.')
+    }
   }
 
   return (

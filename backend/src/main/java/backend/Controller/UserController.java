@@ -7,11 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.Objects;
 
 @RestController
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @RequestMapping("/api")
 public class UserController {
     @Autowired
@@ -27,7 +29,15 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(
+            @RequestBody LoginRequest request,
+            HttpServletRequest servletRequest
+    ) {
+        HttpSession existingSession = servletRequest.getSession(false);
+        if (existingSession != null) {
+            existingSession.invalidate();
+        }
+
         if (request.email() == null || request.password() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -35,8 +45,21 @@ public class UserController {
         return userRepository.findAllByEmail(request.email()).stream()
                 .filter(user -> Objects.equals(user.getPassword(), request.password()))
                 .findFirst()
-                .map(user -> ResponseEntity.ok(new LoginResponse(user.getId(), user.getRole())))
+                .map(user -> {
+                    HttpSession session = servletRequest.getSession(true);
+                    session.setAttribute("userId", user.getId());
+                    return ResponseEntity.ok(new LoginResponse(user.getId(), user.getRole()));
+                })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest servletRequest) {
+        HttpSession session = servletRequest.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return ResponseEntity.noContent().build();
     }
 
     public record LoginRequest(String email, String password) {}

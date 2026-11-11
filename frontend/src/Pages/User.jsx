@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import Navbar from '../Components/Navbar'
 import './Home.css'
 import './User.css'
@@ -153,10 +154,16 @@ function User() {
   const [videoFile, setVideoFile] = useState(null)
   const [uploadError, setUploadError] = useState('')
   const [uploadStatus, setUploadStatus] = useState('')
+  const [isUploading, setIsUploading] = useState(false)
 
-  function onLogout() {
-    localStorage.removeItem('peerlinkRole')
-    navigate('/')
+  async function onLogout() {
+    try {
+      await axios.post('http://localhost:8080/api/logout', {}, { withCredentials: true })
+      localStorage.removeItem('peerlinkRole')
+      navigate('/')
+    } catch {
+      window.alert('Could not end your server session. Please try again.')
+    }
   }
 
   function onVideoFileChange(event) {
@@ -193,9 +200,32 @@ function User() {
     setUploadStatus('')
   }
 
-  function onVideoSubmit(event) {
+  async function onVideoSubmit(event) {
     event.preventDefault()
-    setUploadStatus('The form is ready, but video uploads are not connected to a server yet. Nothing was submitted.')
+    setUploadError('')
+    setUploadStatus('')
+    setIsUploading(true)
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/videos', formData, {
+        withCredentials: true,
+      })
+      setUploadStatus(`Video submitted successfully. Reference ID: ${response.data.id}.`)
+      form.reset()
+      setVideoSource('file')
+      setVideoFile(null)
+    } catch (error) {
+      if (error.response?.status === 401) {
+        setUploadError('Your session has expired. Log in again before uploading.')
+      } else {
+        setUploadError(error.response?.data?.message || 'Video upload failed. Please try again.')
+      }
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   return (
@@ -255,6 +285,8 @@ function User() {
                 onClick={() => {
                   setUploadError('')
                   setUploadStatus('')
+                  setVideoSource('file')
+                  setVideoFile(null)
                   setIsUploadOpen(true)
                 }}
               >
@@ -374,6 +406,7 @@ function User() {
                 className="peerlink-video-close"
                 type="button"
                 aria-label="Close upload form"
+                disabled={isUploading}
                 onClick={() => setIsUploadOpen(false)}
               >
                 ×
@@ -399,11 +432,17 @@ function User() {
                 name="description"
                 rows="4"
                 placeholder="Describe what your video covers"
+                maxLength={5000}
                 required
               />
 
               <label htmlFor="video-source">Video source</label>
-              <select id="video-source" value={videoSource} onChange={onVideoSourceChange}>
+              <select
+                id="video-source"
+                name="source"
+                value={videoSource}
+                onChange={onVideoSourceChange}
+              >
                 <option value="file">Upload a video file</option>
                 <option value="link">Use a video link</option>
               </select>
@@ -450,10 +489,17 @@ function User() {
               )}
 
               <div className="peerlink-video-form-actions">
-                <button type="button" className="secondary" onClick={() => setIsUploadOpen(false)}>
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled={isUploading}
+                  onClick={() => setIsUploadOpen(false)}
+                >
                   Cancel
                 </button>
-                <button type="submit">Submit video</button>
+                <button type="submit" disabled={isUploading}>
+                  {isUploading ? 'Uploading...' : 'Submit video'}
+                </button>
               </div>
             </form>
           </section>

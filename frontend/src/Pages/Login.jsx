@@ -16,7 +16,11 @@ function Login() {
     setIsSubmitting(true)
 
     try {
-      const response = await axios.post('http://localhost:8080/api/login', { email, password })
+      const response = await axios.post(
+        'http://localhost:8080/api/login',
+        { email, password },
+        { withCredentials: true },
+      )
       const { role } = response.data
 
       if (role !== 'ADMIN' && role !== 'USER') {
