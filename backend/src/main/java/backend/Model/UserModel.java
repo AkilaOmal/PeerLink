@@ -1,9 +1,6 @@
 package backend.Model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Data
@@ -16,8 +13,12 @@ public class UserModel {
     @Id
     @GeneratedValue
     private Long id;
+
+
     private String firstName;
+
     private String lastName;
+
     private String email;
     private String password;
     @Column(nullable = false)
