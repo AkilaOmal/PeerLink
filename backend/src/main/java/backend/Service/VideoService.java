@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -93,6 +94,27 @@ public class VideoService {
         }
 
         throw new VideoUploadException("Choose a valid video source.");
+    }
+
+    public List<VideoModel> findAll() {
+        return videoRepository.findAllByOrderByUploadedAtDesc();
+    }
+
+    public VideoModel findById(Long id) {
+        return videoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Video not found."));
+    }
+
+    public Path getStoredVideoPath(VideoModel video) {
+        if (!"file".equals(video.getSource()) || video.getStoredFileName() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This video has no uploaded file.");
+        }
+
+        Path storedFile = uploadDirectory.resolve(video.getStoredFileName()).normalize();
+        if (!storedFile.startsWith(uploadDirectory) || !Files.isRegularFile(storedFile)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Video file was not found.");
+        }
+        return storedFile;
     }
 
     private VideoModel saveVideoFile(VideoModel videoModel, MultipartFile video) {

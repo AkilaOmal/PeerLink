@@ -22,8 +22,10 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -113,6 +115,17 @@ class VideoUploadIntegrationTests {
         assertEquals("lecture.mp4", savedVideo.getOriginalFileName());
         assertTrue(Files.exists(Path.of(uploadDirectory).resolve(savedVideo.getStoredFileName())));
         assertTrue(result.getResponse().getContentAsString().contains("\"id\""));
+
+        String catalog = mockMvc.perform(get("/api/videos").session(session))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertTrue(catalog.contains("Introduction to algorithms"));
+
+        mockMvc.perform(get("/api/videos/{id}/file", savedVideo.getId()).session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(videoFile.getBytes()));
     }
 
     @Test

@@ -210,13 +210,10 @@ function User() {
     const formData = new FormData(form)
 
     try {
-      const response = await axios.post('http://localhost:8080/api/videos', formData, {
+      await axios.post('http://localhost:8080/api/videos', formData, {
         withCredentials: true,
       })
-      setUploadStatus(`Video submitted successfully. Reference ID: ${response.data.id}.`)
-      form.reset()
-      setVideoSource('file')
-      setVideoFile(null)
+      navigate('/courses', { state: { uploadComplete: true } })
     } catch (error) {
       if (error.response?.status === 401) {
         setUploadError('Your session has expired. Log in again before uploading.')
