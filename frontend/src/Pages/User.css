@@ -425,6 +425,7 @@
 }
 
 .course-panel h2,
+.uploaded-lessons-panel h2,
 .notes-panel h2,
 .payment-panel h2 {
   margin: 0 0 16px;
@@ -453,6 +454,123 @@
   line-height: 1.3;
 }
 
+.uploaded-lessons-panel {
+  grid-column: 2 / -1;
+  grid-row: 3;
+  min-width: 0;
+}
+
+.uploaded-lessons-heading {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.uploaded-lessons-heading h2 {
+  margin: 0;
+}
+
+.uploaded-lessons-heading > span {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #5b47a2;
+  background: #eeeafb;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.uploaded-lessons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.uploaded-lesson-row {
+  min-width: 0;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #e7e5ee;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.uploaded-lesson-info {
+  min-width: 0;
+}
+
+.uploaded-lesson-subject {
+  color: #7653ca;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.uploaded-lesson-info h3 {
+  margin: 5px 0;
+  overflow-wrap: anywhere;
+  color: #252330;
+  font-size: 1rem;
+}
+
+.uploaded-lesson-info p {
+  margin: 0 0 7px;
+  overflow-wrap: anywhere;
+  color: #625f6b;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.uploaded-lesson-info small {
+  color: #85808c;
+  font-size: 0.76rem;
+}
+
+.uploaded-lesson-delete {
+  min-height: 36px;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  border: 1px solid #f0c8cc;
+  border-radius: 8px;
+  color: #a62e3a;
+  background: #fff7f7;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.uploaded-lesson-delete:hover:not(:disabled) {
+  border-color: #e6a7ae;
+  background: #ffeded;
+}
+
+.uploaded-lesson-delete:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.uploaded-lessons-empty,
+.uploaded-lessons-error {
+  margin: 0;
+  padding: 12px 0;
+  color: #77727f;
+  font-size: 0.9rem;
+}
+
+.uploaded-lessons-error {
+  color: #b42318;
+}
+
 .peerlink-progress-label {
   margin-top: 12px;
   display: flex;
@@ -479,7 +597,7 @@
 
 .notes-panel {
   grid-column: 2;
-  grid-row: 3;
+  grid-row: 4;
   min-height: 220px;
 }
 
@@ -542,7 +660,7 @@
 
 .payment-panel {
   grid-column: 2 / -1;
-  grid-row: 4;
+  grid-row: 5;
   min-height: 0;
 }
 
@@ -593,6 +711,7 @@
   .peerlink-sidebar,
   .profile-panel,
   .course-panel,
+  .uploaded-lessons-panel,
   .notes-panel,
   .payment-panel {
     grid-column: auto;
@@ -639,6 +758,11 @@
 
   .peerlink-course-grid {
     grid-template-columns: 1fr;
+  }
+
+  .uploaded-lesson-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .peerlink-table-wrap th,

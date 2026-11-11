@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -123,6 +124,13 @@ class VideoUploadIntegrationTests {
                 .getContentAsString();
         assertTrue(catalog.contains("Introduction to algorithms"));
 
+        String myLessons = mockMvc.perform(get("/api/videos/mine").session(session))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertTrue(myLessons.contains("Introduction to algorithms"));
+
         mockMvc.perform(get("/api/videos/{id}/file", savedVideo.getId()).session(session))
                 .andExpect(status().isOk())
                 .andExpect(content().bytes(videoFile.getBytes()));
@@ -180,5 +188,76 @@ class VideoUploadIntegrationTests {
                         .session(session))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("The selected file must be a video."));
+    }
+
+    @Test
+    void ownerCanDeleteUploadedFileAndMetadata() throws Exception {
+        MockMultipartFile videoFile = new MockMultipartFile(
+                "video",
+                "delete-me.mp4",
+                "video/mp4",
+                new byte[]{0, 0, 0, 24, 102, 116, 121, 112}
+        );
+        mockMvc.perform(multipart("/api/videos")
+                        .file(videoFile)
+                        .param("subject", "Computer Science")
+                        .param("description", "Delete test video")
+                        .param("source", "file")
+                        .session(session))
+                .andExpect(status().isCreated());
+
+        VideoModel uploadedVideo = videoRepository.findAll().stream()
+                .filter(video -> video.getUploadedBy().getId().equals(testUser.getId()))
+                .findFirst()
+                .orElseThrow();
+        Path storedFile = Path.of(uploadDirectory).resolve(uploadedVideo.getStoredFileName());
+        assertTrue(Files.exists(storedFile));
+
+        mockMvc.perform(delete("/api/videos/{id}", uploadedVideo.getId()).session(session))
+                .andExpect(status().isNoContent());
+
+        assertFalse(videoRepository.existsById(uploadedVideo.getId()));
+        assertFalse(Files.exists(storedFile));
+    }
+
+    @Test
+    void anotherUserCannotDeleteSomeoneElsesLesson() throws Exception {
+        mockMvc.perform(multipart("/api/videos")
+                        .param("subject", "Computer Science")
+                        .param("description", "Owned link test")
+                        .param("source", "link")
+                        .param("videoLink", "https://example.com/owned-lesson")
+                        .session(session))
+                .andExpect(status().isCreated());
+
+        VideoModel uploadedVideo = videoRepository.findAll().stream()
+                .filter(video -> video.getUploadedBy().getId().equals(testUser.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        UserModel otherUser = new UserModel();
+        otherUser.setFirstName("Other");
+        otherUser.setLastName("Test");
+        otherUser.setEmail("video-delete-" + UUID.randomUUID() + "@example.test");
+        otherUser.setPassword("test-password");
+        otherUser.setRole("USER");
+        otherUser = userRepository.save(otherUser);
+
+        try {
+            MvcResult loginResult = mockMvc.perform(post("/api/login")
+                            .contentType("application/json")
+                            .content("{\"email\":\"" + otherUser.getEmail()
+                                    + "\",\"password\":\"test-password\"}"))
+                    .andExpect(status().isOk())
+                    .andReturn();
+            MockHttpSession otherSession = (MockHttpSession) loginResult.getRequest().getSession(false);
+            assertNotNull(otherSession);
+
+            mockMvc.perform(delete("/api/videos/{id}", uploadedVideo.getId()).session(otherSession))
+                    .andExpect(status().isNotFound());
+            assertTrue(videoRepository.existsById(uploadedVideo.getId()));
+        } finally {
+            userRepository.delete(otherUser);
+        }
     }
 }

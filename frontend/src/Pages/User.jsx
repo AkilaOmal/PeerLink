@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Navbar from '../Components/Navbar'
@@ -54,6 +54,13 @@ const paymentRows = [
 ]
 
 const notesList = ['File.m1', 'Document #2', 'File.m3', 'Document #2', 'File.m5', 'Lecture Notes']
+
+function formatLessonDate(value) {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime())
+    ? 'Recently uploaded'
+    : date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+}
 
 function UserIcon({ name }) {
   const common = {
@@ -155,6 +162,38 @@ function User() {
   const [uploadError, setUploadError] = useState('')
   const [uploadStatus, setUploadStatus] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadedLessons, setUploadedLessons] = useState([])
+  const [isLoadingLessons, setIsLoadingLessons] = useState(true)
+  const [lessonsError, setLessonsError] = useState('')
+  const [deletingLessonId, setDeletingLessonId] = useState(null)
+
+  useEffect(() => {
+    let isCurrent = true
+
+    axios.get('http://localhost:8080/api/videos/mine', { withCredentials: true })
+      .then((response) => {
+        if (isCurrent) {
+          setUploadedLessons(response.data)
+        }
+      })
+      .catch((error) => {
+        if (!isCurrent) return
+        if (error.response?.status === 401) {
+          navigate('/login', { replace: true })
+        } else {
+          setLessonsError('Could not load your uploaded lessons.')
+        }
+      })
+      .finally(() => {
+        if (isCurrent) {
+          setIsLoadingLessons(false)
+        }
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [navigate])
 
   async function onLogout() {
     try {
@@ -222,6 +261,30 @@ function User() {
       }
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  async function onDeleteLesson(lesson) {
+    const lessonName = lesson.originalFileName || lesson.subject
+    if (!window.confirm(`Delete "${lessonName}" from your uploaded lessons?`)) {
+      return
+    }
+
+    setDeletingLessonId(lesson.id)
+    setLessonsError('')
+    try {
+      await axios.delete(`http://localhost:8080/api/videos/${lesson.id}`, {
+        withCredentials: true,
+      })
+      setUploadedLessons((lessons) => lessons.filter((item) => item.id !== lesson.id))
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate('/login', { replace: true })
+      } else {
+        setLessonsError(error.response?.data?.message || 'Could not delete this lesson. Please try again.')
+      }
+    } finally {
+      setDeletingLessonId(null)
     }
   }
 
@@ -335,6 +398,49 @@ function User() {
                 </div>
               ))}
             </div>
+          </section>
+
+          <section className="peerlink-panel uploaded-lessons-panel">
+            <div className="uploaded-lessons-heading">
+              <h2>Uploaded Lessons</h2>
+              {!isLoadingLessons && <span>{uploadedLessons.length}</span>}
+            </div>
+
+            {lessonsError && (
+              <p className="uploaded-lessons-error" role="alert">
+                {lessonsError}
+              </p>
+            )}
+            {isLoadingLessons ? (
+              <p className="uploaded-lessons-empty">Loading your lessons...</p>
+            ) : uploadedLessons.length === 0 ? (
+              <p className="uploaded-lessons-empty">You have not uploaded any lessons yet.</p>
+            ) : (
+              <div className="uploaded-lessons-list">
+                {uploadedLessons.map((lesson) => (
+                  <article className="uploaded-lesson-row" key={lesson.id}>
+                    <div className="uploaded-lesson-info">
+                      <span className="uploaded-lesson-subject">{lesson.subject}</span>
+                      <h3>{lesson.originalFileName || lesson.subject}</h3>
+                      <p>{lesson.description}</p>
+                      <small>
+                        {lesson.source === 'file' ? 'Video file' : 'Video link'}
+                        {' · '}
+                        {formatLessonDate(lesson.uploadedAt)}
+                      </small>
+                    </div>
+                    <button
+                      type="button"
+                      className="uploaded-lesson-delete"
+                      disabled={deletingLessonId !== null}
+                      onClick={() => onDeleteLesson(lesson)}
+                    >
+                      {deletingLessonId === lesson.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="peerlink-panel notes-panel">

@@ -42,6 +42,19 @@ public class VideoController {
         return ResponseEntity.ok(videos);
     }
 
+    @GetMapping("/mine")
+    public ResponseEntity<?> getMyVideos(HttpServletRequest servletRequest) {
+        Long authenticatedUserId = getAuthenticatedUserId(servletRequest);
+        if (authenticatedUserId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Log in to view your uploaded lessons."));
+        }
+        List<VideoResponse> videos = videoService.findByUploaderId(authenticatedUserId).stream()
+                .map(VideoResponse::from)
+                .toList();
+        return ResponseEntity.ok(videos);
+    }
+
     @GetMapping("/{id}/file")
     public ResponseEntity<?> getVideoFile(
             @PathVariable Long id,
@@ -89,6 +102,20 @@ public class VideoController {
                 videoLink
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(VideoResponse.from(savedVideo));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteVideo(
+            @PathVariable Long id,
+            HttpServletRequest servletRequest
+    ) {
+        Long authenticatedUserId = getAuthenticatedUserId(servletRequest);
+        if (authenticatedUserId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Log in before deleting a lesson."));
+        }
+        videoService.delete(authenticatedUserId, id);
+        return ResponseEntity.noContent().build();
     }
 
     private boolean hasAuthenticatedUser(HttpServletRequest request) {

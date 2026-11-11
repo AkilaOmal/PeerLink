@@ -100,9 +100,42 @@ public class VideoService {
         return videoRepository.findAllByOrderByUploadedAtDesc();
     }
 
+    public List<VideoModel> findByUploaderId(Long userId) {
+        return videoRepository.findByUploadedBy_IdOrderByUploadedAtDesc(userId);
+    }
+
     public VideoModel findById(Long id) {
         return videoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Video not found."));
+    }
+
+    public void delete(Long userId, Long videoId) {
+        VideoModel video = findById(videoId);
+        if (!video.getUploadedBy().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found.");
+        }
+
+        Path storedFile = null;
+        if ("file".equals(video.getSource()) && video.getStoredFileName() != null) {
+            storedFile = uploadDirectory.resolve(video.getStoredFileName()).normalize();
+            if (!storedFile.startsWith(uploadDirectory)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found.");
+            }
+        }
+
+        videoRepository.delete(video);
+
+        if (storedFile != null) {
+            try {
+                Files.deleteIfExists(storedFile);
+            } catch (IOException exception) {
+                throw new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Lesson metadata was deleted, but its video file could not be removed.",
+                        exception
+                );
+            }
+        }
     }
 
     public Path getStoredVideoPath(VideoModel video) {
