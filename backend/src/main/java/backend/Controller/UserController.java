@@ -28,6 +28,21 @@ public class UserController {
         return userRepository.save(Newuser);
     }
 
+    @GetMapping("/user/me")
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest servletRequest) {
+        HttpSession session = servletRequest.getSession(false);
+        Object userId = session == null ? null : session.getAttribute("userId");
+        if (!(userId instanceof Long authenticatedUserId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return userRepository.findById(authenticatedUserId)
+                .<ResponseEntity<?>>map(user -> ResponseEntity.ok(
+                        new UserProfileResponse(user.getFirstName(), user.getEmail())
+                ))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @RequestBody LoginRequest request,
@@ -66,5 +81,6 @@ public class UserController {
 
     public record LoginResponse(Long id, String role) {}
 
+    public record UserProfileResponse(String firstName, String email) {}
 
 }

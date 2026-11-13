@@ -137,6 +137,21 @@ class VideoUploadIntegrationTests {
     }
 
     @Test
+    void authenticatedUserCanGetTheirProfileWithoutSensitiveFields() throws Exception {
+        mockMvc.perform(get("/api/user/me").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value(testUser.getFirstName()))
+                .andExpect(jsonPath("$.email").value(testUser.getEmail()))
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    void profileRequiresAnAuthenticatedSession() throws Exception {
+        mockMvc.perform(get("/api/user/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void authenticatedUserCanSaveVideoLink() throws Exception {
         mockMvc.perform(multipart("/api/videos")
                         .param("subject", "Software Engineering")

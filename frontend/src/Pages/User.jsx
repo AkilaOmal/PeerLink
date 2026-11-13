@@ -166,9 +166,26 @@ function User() {
   const [isLoadingLessons, setIsLoadingLessons] = useState(true)
   const [lessonsError, setLessonsError] = useState('')
   const [deletingLessonId, setDeletingLessonId] = useState(null)
+  const [userProfile, setUserProfile] = useState(null)
+  const [profileError, setProfileError] = useState('')
 
   useEffect(() => {
     let isCurrent = true
+
+    axios.get('http://localhost:8080/api/user/me', { withCredentials: true })
+      .then((response) => {
+        if (isCurrent) {
+          setUserProfile(response.data)
+        }
+      })
+      .catch((error) => {
+        if (!isCurrent) return
+        if (error.response?.status === 401) {
+          navigate('/login', { replace: true })
+        } else {
+          setProfileError('Could not load your profile.')
+        }
+      })
 
     axios.get('http://localhost:8080/api/videos/mine', { withCredentials: true })
       .then((response) => {
@@ -361,8 +378,8 @@ function User() {
                 <UserIcon name="profile" />
               </div>
               <div className="peerlink-profile-copy">
-                <h2>Khan Heorat</h2>
-                <p>user@mya.com</p>
+                <h2>{userProfile?.firstName || (profileError ? 'Profile unavailable' : 'Loading profile...')}</h2>
+                <p>{userProfile?.email || (profileError && 'Could not load your profile.')}</p>
               </div>
             </div>
 
